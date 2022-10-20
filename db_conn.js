@@ -4,7 +4,7 @@ const conn = mysql.createConnection({
     host: process.env.DBHOST,
     user: process.env.DBUSER,
     password: process.env.DBPWD,
-    database: process.env.DBNAME
+    database: "microservice2"
 })
 
 conn.connect()
