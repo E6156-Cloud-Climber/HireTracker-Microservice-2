@@ -116,19 +116,19 @@ api_position.get('/positions/:position_id', (req, res) => {
 api_position.put('/positions/:position_id', (req, res) => {
     let position_id = req.params.position_id;
 
-    let company_id = req.body.company_id;
-    let name  = req.body.name ?? null;
-    let position_type = req.body.position_type ?? null;
+    let company_id = req.body.company_id ?? 0;
+    let name  = req.body.name ?? '';
+    let position_type = req.body.position_type ?? '';
     let active = req.body.active ?? null;
 
     let year = req.body.year ?? null;
-    let link = req.body.link ?? null;
+    let link = req.body.link ?? '';
 
-    let sql = `update positions set let company_id = COALESCE(${company_id}, company_id), 
-                name = COALESCE('${name}', name), 
-                position_type = COALESCE('${position_type}', position_type), 
+    let sql = `update positions set company_id = COALESCE(NULLIF(${company_id}, 0), company_id), 
+                name = COALESCE(NULLIF('${name}', ''), name), 
+                position_type = COALESCE(NULLIF('${position_type}', ''), position_type), 
                 active = COALESCE(${active}, active), year = COALESCE(${year}, year), 
-                link = COALESCE('${link}', link) where id=${position_id}`
+                link = COALESCE(NULLIF('${link}', ''), link) where id=${position_id}`
 
     conn.query(sql, (err, rows, fields) => {
         if (err)
