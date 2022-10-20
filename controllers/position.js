@@ -28,9 +28,9 @@ api_position.get('/positions', (req, res) => {
 
     if (position_type) {
         if (count) {
-            sql += ` and position_type = ${position_type}`
+            sql += ` and position_type = '${position_type}'`
         } else {
-            sql += ` position_type = ${position_type}`
+            sql += ` position_type = '${position_type}'`
             count+= 1
         }
     }
@@ -85,7 +85,7 @@ api_position.post('/positions', (req, res) => {
 
     let active = req.body.active;
     let sql = `insert into positions (company_id, name, position_type, active, year, link) 
-                values (${company_id}, ${name}, ${position_type}, ${active}, ${year}, ${link})`;
+                values (${company_id}, '${name}', '${position_type}', ${active}, ${year}, '${link}')`;
 
     conn.query(sql, (err, rows, fields) => {
         if (err)
@@ -100,7 +100,7 @@ api_position.post('/positions', (req, res) => {
 api_position.get('/positions/:position_id', (req, res) => {
     let position_id = req.params.position_id
 
-    let sql = `select * from posts where id = ${position_id}`
+    let sql = `select * from positions where id = ${position_id}`
 
     conn.query(sql, (err, rows, fields) => {
         if (err)
@@ -125,10 +125,10 @@ api_position.put('/positions/:position_id', (req, res) => {
     let link = req.body.link ?? null;
 
     let sql = `update positions set let company_id = COALESCE(${company_id}, company_id), 
-                name = COALESCE(${position_id}, name), 
-                position_type = COALESCE(${position_type}, position_type), 
+                name = COALESCE('${name}', name), 
+                position_type = COALESCE('${position_type}', position_type), 
                 active = COALESCE(${active}, active), year = COALESCE(${year}, year), 
-                link = COALESCE(${link}, link) where id=${position_id}`
+                link = COALESCE('${link}', link) where id=${position_id}`
 
     conn.query(sql, (err, rows, fields) => {
         if (err)
