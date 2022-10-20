@@ -24,7 +24,7 @@ INSERT INTO companies (name) VALUES
   ('Uber'),
   ('Meta');
 
-INSERT INTO posts (company_id, name, position_type, year, active, link)
+INSERT INTO positions (company_id, name, position_type, year, active, link)
 VALUES
     (1, "Software Engineer, Recent Grad", "Full-Time", 2022, true, ""),
     (2, "Software Development Engineer", "Full-Time", 2022, true, ""),
