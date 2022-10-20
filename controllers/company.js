@@ -36,7 +36,7 @@ api_company.post('/companies', (req, res) => {
 api_company.get('/companies/:company_id', (req, res) => {
     let company_id = req.params.company_id
 
-    conn.query(`select * from phases where id = ${company_id}`, (err, rows, fields) => {
+    conn.query(`select * from companies where id = ${company_id}`, (err, rows, fields) => {
         if (err)
             res.status(500).json({ error: err })
         else if (rows.length == 0)
