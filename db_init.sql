@@ -30,7 +30,7 @@ VALUES
     (2, "Software Development Engineer", "Full-Time", 2022, true, ""),
     (4, "New Software Engineer", "Part-Time", 2022, true, ""),
 
-    (8, "Software Engineer, Recent Grad", "Full-Time", 2021, false, ""),,
+    (8, "Software Engineer, Recent Grad", "Full-Time", 2021, false, ""),
 
     (5, "Software Engineer Intern", "Internship", 2022, true, ""),
     (6, "Software Engineer", "Contractor", 2022, true, "");
