@@ -13,8 +13,8 @@ api_position.get('/positions', (req, res) => {
     let position_type = req.query.position_type ?? ""
     let year = req.query.year ?? 0;
     let active = req.query.active ?? 0;
-    let offset = req.query.offset ?? 0;
-    let limit = req.query.limit ?? 25;
+    let offset = Number(req.query.offset) ?? 0
+    let limit = Number(req.query.limit) ?? 25
 
     var count = 0;
     let sql = `select * from positions`
@@ -67,8 +67,32 @@ api_position.get('/positions', (req, res) => {
     conn.query(sql, (err, rows, fields) => {
         if (err)
             res.status(500).json({ error: err })
-        else
-            res.json(rows)
+        else {
+            rows.forEach(
+                (row) => {
+                    row["links"] = {
+                    "company": `/companies/${row.company_id}`
+                    };
+                }
+            )
+            if (offset !== 0 ) {
+                res.json(
+                    {positions: rows,
+                        links: {
+                            next: `/positions?offset=${offset + limit}&limit=${limit}`,
+                            prev: `/positions?offset=${Math.max(offset - limit, 0)}&limit=${limit}`
+                        }
+                    })
+            } else {
+                res.json(
+                    {positions: rows,
+                        links: {
+                            next: `/positions?offset=${offset + limit}&limit=${limit}`,
+                            prev: ``
+                        }
+                    })
+            }
+        }
     })
 })
 

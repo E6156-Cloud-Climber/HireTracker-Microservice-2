@@ -7,16 +7,33 @@ api_company.use(express.json())
 
 api_company.get('/companies', (req, res) => {
     let search_string = req.query.search_string ?? ""
-    let offset = req.query.offset ?? 0
-    let limit = req.query.limit ?? 25
+    let offset = Number(req.query.offset) ?? 0
+    let limit = Number(req.query.limit) ?? 25
 
     conn.query(`select * from companies where name like '%${search_string}%' limit ${limit} offset ${offset}`, (err, rows, fields) => {
         if (err)
             res.status(500).json({ error: err })
         else if (rows.length == 0)
             res.status(400).json({ error: "no results matched" })
-        else
-            res.json(rows)
+        else {
+            if (offset !== 0 ) {
+                res.json(
+                    {companies: rows,
+                        links: {
+                            next: `/companies?offset=${offset + limit}&limit=${limit}`,
+                            prev: `/companies?offset=${Math.max(offset - limit, 0)}&limit=${limit}`
+                        }
+                    })
+            } else {
+                res.json(
+                    {companies: rows,
+                        links: {
+                            next: `/companies?offset=${offset + limit}&limit=${limit}`,
+                            prev: ``
+                        }
+                    })
+            }
+        }
     })
 })
 
