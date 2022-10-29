@@ -131,8 +131,13 @@ api_position.get('/positions/:position_id', (req, res) => {
             res.status(500).json({ error: err })
         else if (rows.length == 0)
             res.status(400).json({ error: "id not exist" })
-        else
-            res.json(rows[0])
+        else {
+            let position = rows[0]
+            position.links = {
+                company: `/companies/${position.company_id}`
+            }
+            res.json(position)
+        }
     })
 })
 
