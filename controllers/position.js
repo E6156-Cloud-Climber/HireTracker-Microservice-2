@@ -13,24 +13,27 @@ api_position.get('/positions', (req, res) => {
     let position_type = req.query.position_type ?? ""
     let year = req.query.year ?? 0;
     let active = req.query.active ?? 0;
-    let offset = Number(req.query.offset) ?? 0
-    let limit = Number(req.query.limit) ?? 25
+    let offset = Number(req.query.offset ?? 0)
+    let limit = Number(req.query.limit ?? 25)
 
     var count = 0;
     let sql = `select * from positions`
-
+    let sql_total = `select count(*) from positions`
     if (company_id || search_string || position_type || year || active) sql += ` where`
 
     if (search_string) {
         sql +=  ` name like '%${search_string}%'`;
+        sql_total +=  ` name like '%${search_string}%'`;
         count += 1
     }
 
     if (position_type) {
         if (count) {
             sql += ` and position_type = '${position_type}'`
+            sql_total += ` and position_type = '${position_type}'`
         } else {
             sql += ` position_type = '${position_type}'`
+            sql_total += ` position_type = '${position_type}'`
             count+= 1
         }
     }
@@ -75,23 +78,23 @@ api_position.get('/positions', (req, res) => {
                     };
                 }
             )
-            if (offset !== 0 ) {
-                res.json(
-                    {positions: rows,
-                        links: {
-                            next: `/positions?offset=${offset + limit}&limit=${limit}`,
-                            prev: `/positions?offset=${Math.max(offset - limit, 0)}&limit=${limit}`
-                        }
-                    })
-            } else {
-                res.json(
-                    {positions: rows,
-                        links: {
-                            next: `/positions?offset=${offset + limit}&limit=${limit}`,
-                            prev: ``
-                        }
-                    })
-            }
+
+            conn.query(sql_total, (err1, totals, fields) => {
+                if (err1) {
+                    res.status(500).json({error: err1})
+                    return
+                }
+
+                let total = totals[0].total
+
+                res.json({
+                    positions: rows,
+                    links: {
+                        next: offset + limit < total ? `/positions?offset=${offset + limit}&limit=${limit}` : '',
+                        prev: offset > 0 ? `/positions?offset=${Math.max(offset - limit, 0)}&limit=${limit}` : ''
+                    }
+                })
+            })
         }
     })
 })

@@ -7,32 +7,36 @@ api_company.use(express.json())
 
 api_company.get('/companies', (req, res) => {
     let search_string = req.query.search_string ?? ""
-    let offset = Number(req.query.offset) ?? 0
-    let limit = Number(req.query.limit) ?? 25
+    let offset = Number(req.query.offset ?? 0);
+    let limit = Number(req.query.limit ?? 25);
+    let sql = `select * from companies where name like '%${search_string}%' limit ${limit} offset ${offset}`
 
-    conn.query(`select * from companies where name like '%${search_string}%' limit ${limit} offset ${offset}`, (err, rows, fields) => {
-        if (err)
+    conn.query(sql, (err, rows, fields) => {
+        if (err) {
             res.status(500).json({ error: err })
-        else if (rows.length == 0)
+            return
+        } else if (rows.length == 0)
             res.status(400).json({ error: "no results matched" })
         else {
-            if (offset !== 0 ) {
-                res.json(
-                    {companies: rows,
-                        links: {
-                            next: `/companies?offset=${offset + limit}&limit=${limit}`,
-                            prev: `/companies?offset=${Math.max(offset - limit, 0)}&limit=${limit}`
-                        }
-                    })
-            } else {
-                res.json(
-                    {companies: rows,
-                        links: {
-                            next: `/companies?offset=${offset + limit}&limit=${limit}`,
-                            prev: ``
-                        }
-                    })
-            }
+        // total count
+            let sql_total = `select count(*) as total from companies`
+
+            conn.query(sql_total, (err1, totals, fields) => {
+                if (err1) {
+                    res.status(500).json({ error: err1 })
+                    return
+                }
+
+                let total = totals[0].total
+
+                res.json({
+                    positions: rows,
+                    links: {
+                        next: offset + limit < total ? `/companies?offset=${offset + limit}&limit=${limit}` : '',
+                        prev: offset > 0 ? `/companies?offset=${Math.max(offset - limit, 0)}&limit=${limit}` : ''
+                    }
+                })
+            })
         }
     })
 })
