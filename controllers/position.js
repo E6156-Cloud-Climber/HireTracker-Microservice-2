@@ -10,9 +10,9 @@ api_position.get('/positions', (req, res) => {
     let company_id = req.query.company_id ?? 0;
     // let position_id = req.query.position_id ?? 0
     let search_string = req.query.search_string ?? "";
-    let position_type = req.query.position_type ?? ""
+    let position_type = req.query.position_type ?? "";
     let year = req.query.year ?? 0;
-    let active = req.query.active ?? 0;
+    let active = req.query.active ?? 1;
     let offset = Number(req.query.offset ?? 0)
     let limit = Number(req.query.limit ?? 25)
 
@@ -55,14 +55,14 @@ api_position.get('/positions', (req, res) => {
         }
     }
 
-    if (active) {
-        if (count) {
-            sql += ` and active = ${active}`
-        } else {
-            sql += ` active = ${active}`
-            count+= 1
-        }
+
+    if (count) {
+        sql += ` and active = ${active}`
+    } else {
+        sql += ` active = ${active}`
+        count+= 1
     }
+
 
     //sql += ` order by id desc`
     sql += ` limit ${limit} offset ${offset}`;
@@ -132,7 +132,7 @@ api_position.get('/positions/:position_id', (req, res) => {
     conn.query(sql, (err, rows, fields) => {
         if (err)
             res.status(500).json({ error: err })
-        else if (rows.length == 0)
+        else if (rows.length === 0)
             res.status(400).json({ error: "id not exist" })
         else {
             let position = rows[0]
