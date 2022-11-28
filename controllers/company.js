@@ -30,7 +30,7 @@ api_company.get('/companies', (req, res) => {
                 let total = totals[0].total
 
                 res.json({
-                    positions: rows,
+                    companies: rows,
                     links: {
                         next: offset + limit < total ? `/companies?offset=${offset + limit}&limit=${limit}` : '',
                         prev: offset > 0 ? `/companies?offset=${Math.max(offset - limit, 0)}&limit=${limit}` : ''
