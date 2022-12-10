@@ -7,8 +7,11 @@ api_company.use(express.json())
 
 api_company.get('/companies', (req, res) => {
     let search_string = req.query.search_string ?? ""
-    let offset = Number(req.query.offset ?? 0);
-    let limit = Number(req.query.limit ?? 25);
+    let page = Number(req.query.page ?? 1); // page number is 1-indexed
+    let limit = Number(req.query.limit ?? 20);
+
+    let offset = (page-1)*limit; // for first page, offset = 0
+
     let sql = `select * from companies where name like '%${search_string}%' limit ${limit} offset ${offset}`
 
     conn.query(sql, (err, rows, fields) => {
@@ -19,7 +22,7 @@ api_company.get('/companies', (req, res) => {
             res.status(400).json({ error: "no results matched" })
         else {
         // total count
-            let sql_total = `select count(*) as total from companies`
+            let sql_total = `select count(*) as total from companies where name like '%${search_string}%'`
 
             conn.query(sql_total, (err1, totals, fields) => {
                 if (err1) {
@@ -32,8 +35,8 @@ api_company.get('/companies', (req, res) => {
                 res.json({
                     companies: rows,
                     links: {
-                        next: offset + limit < total ? `/companies?offset=${offset + limit}&limit=${limit}` : '',
-                        prev: offset > 0 ? `/companies?offset=${Math.max(offset - limit, 0)}&limit=${limit}` : ''
+                        next: page * limit < total ? `/companies?search_stirng=${search_string}page=${page+1}&limit=${limit}` : '',
+                        prev: page-1 > 0 ? `/companies?search_stirng=${search_string}page=${page-1}&limit=${limit}` : ''
                     }
                 })
             })
