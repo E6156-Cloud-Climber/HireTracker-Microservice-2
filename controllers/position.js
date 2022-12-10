@@ -13,44 +13,54 @@ api_position.get('/positions', (req, res) => {
     let position_type = req.query.position_type ?? "";
     let year = req.query.year ?? 0;
     let active = req.query.active ?? 1;
-    let offset = Number(req.query.offset ?? 0)
-    let limit = Number(req.query.limit ?? 25)
 
+    let page = Number(req.query.page ?? 1); // page number is 1-indexed
+    let limit = Number(req.query.limit ?? 20);
+
+    let offset = (page-1)*limit; // for first page, offset = 0
+    console.log(req.query)
     var count = 0;
-    let sql = `select * from positions`
-    let sql_total = `select count(*) from positions`
-    if (company_id || search_string || position_type || year || active) sql += ` where`
+    let sql = `select * from positions`;
+    let sql_total = `select count(*) as total from positions`;
+    if (company_id || search_string || position_type || year || active) {
+        sql += ` where`;
+        sql_total += ` where`;
+    }
 
     if (search_string) {
         sql +=  ` name like '%${search_string}%'`;
         sql_total +=  ` name like '%${search_string}%'`;
-        count += 1
+        count += 1;
     }
 
     if (position_type) {
         if (count) {
-            sql += ` and position_type = '${position_type}'`
-            sql_total += ` and position_type = '${position_type}'`
+            sql += ` and position_type = '${position_type}'`;
+            sql_total += ` and position_type = '${position_type}'`;
         } else {
-            sql += ` position_type = '${position_type}'`
-            sql_total += ` position_type = '${position_type}'`
+            sql += ` position_type = '${position_type}'`;
+            sql_total += ` position_type = '${position_type}'`;
             count+= 1
         }
     }
 
     if (company_id) {
         if (count) {
-            sql += ` and company_id = ${company_id}`
+            sql += ` and company_id = ${company_id}`;
+            sql_total += ` and company_id = ${company_id}`;
         } else {
-            sql += ` company_id = ${company_id}`
+            sql += ` company_id = ${company_id}`;
+            sql_total += ` company_id = ${company_id}`;
             count+= 1
         }
     }
     if (year) {
         if (count) {
             sql += ` and year = ${year}`
+            sql_total += ` and year = ${year}`
         } else {
             sql += ` year = ${year}`
+            sql_total += ` year = ${year}`
             count+= 1
         }
     }
@@ -58,14 +68,17 @@ api_position.get('/positions', (req, res) => {
 
     if (count) {
         sql += ` and active = ${active}`
+        sql_total += ` and active = ${active}`
     } else {
         sql += ` active = ${active}`
+        sql_total += ` active = ${active}`
         count+= 1
     }
 
 
     //sql += ` order by id desc`
     sql += ` limit ${limit} offset ${offset}`;
+    //sql_total += ` limit ${limit} offset ${offset}`;
 
     conn.query(sql, (err, rows, fields) => {
         if (err)
@@ -85,13 +98,15 @@ api_position.get('/positions', (req, res) => {
                     return
                 }
 
+                console.log(sql_total)
                 let total = totals[0].total
+
 
                 res.json({
                     positions: rows,
                     links: {
-                        next: offset + limit < total ? `/positions?offset=${offset + limit}&limit=${limit}` : '',
-                        prev: offset > 0 ? `/positions?offset=${Math.max(offset - limit, 0)}&limit=${limit}` : ''
+                        next: page * limit < total ? `/positions?page=${page+1}&limit=${limit}` : '',
+                        prev: page-1 > 0 ? `/positions?page=${page-1}&limit=${limit}` : ''
                     }
                 })
             })
