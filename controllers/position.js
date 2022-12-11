@@ -7,18 +7,18 @@ api_position.use(express.json())
 
 
 api_position.get('/positions', (req, res) => {
-    let company_id = req.query.company_id ?? 0;
-    // let position_id = req.query.position_id ?? 0
+    let company_id = req.query.company_id ?? '';
+    // let position_id = req.query.position_id ?? '
     let search_string = req.query.search_string ?? "";
     let position_type = req.query.position_type ?? "";
-    let year = req.query.year ?? 0;
-    let active = req.query.active ?? 1;
+    let year = req.query.year ?? '';
+    let active = Number(req.query.active ?? 1);
 
     let page = Number(req.query.page ?? 1); // page number is 1-indexed
     let limit = Number(req.query.limit ?? 20);
 
     let offset = (page-1)*limit; // for first page, offset = 0
-    console.log(req.query)
+    //console.log(req.query)
     var count = 0;
     let sql = `select * from positions`;
     let sql_total = `select count(*) as total from positions`;
@@ -54,6 +54,7 @@ api_position.get('/positions', (req, res) => {
             count+= 1
         }
     }
+
     if (year) {
         if (count) {
             sql += ` and year = ${year}`
@@ -65,7 +66,7 @@ api_position.get('/positions', (req, res) => {
         }
     }
 
-
+    //position active status
     if (count) {
         sql += ` and active = ${active}`
         sql_total += ` and active = ${active}`
@@ -105,8 +106,8 @@ api_position.get('/positions', (req, res) => {
                 res.json({
                     positions: rows,
                     links: {
-                        next: page * limit < total ? `/positions?page=${page+1}&limit=${limit}` : '',
-                        prev: page-1 > 0 ? `/positions?page=${page-1}&limit=${limit}` : ''
+                        next: page * limit < total ? `/positions?company_id=${company_id}&search_string=${search_string}&position_type=${position_type}&year=${year}&active=${active}&page=${page+1}&limit=${limit}` : '',
+                        prev: page-1 > 0 ? `/positions?company_id=${company_id}&search_string=${search_string}&position_type=${position_type}&year=${year}&active=${active}&page=${page-1}&limit=${limit}` : ''
                     }
                 })
             })
