@@ -26,11 +26,11 @@ INSERT INTO companies (name) VALUES
 
 INSERT INTO positions (company_id, name, position_type, year, active, link)
 VALUES
-    (1, "Software Engineer, Recent Grad", "Full-Time", 2022, true, ""),
-    (2, "Software Development Engineer", "Full-Time", 2022, true, ""),
-    (4, "New Software Engineer", "Part-Time", 2022, true, ""),
+    (1, "Software Engineer, Recent Grad", 1, 2022, true, ""),
+    (2, "Software Development Engineer", 1, 2022, true, ""),
+    (4, "New Software Engineer", 2, 2022, true, ""),
 
-    (8, "Software Engineer, Recent Grad", "Full-Time", 2021, false, ""),
+    (8, "Software Engineer, Recent Grad", 1, 2021, false, ""),
 
-    (5, "Software Engineer Intern", "Internship", 2022, true, ""),
-    (6, "Software Engineer", "Contractor", 2022, true, "");
+    (5, "Software Engineer Intern", 4, 2022, true, ""),
+    (6, "Software Engineer", 3, 2022, true, "");
